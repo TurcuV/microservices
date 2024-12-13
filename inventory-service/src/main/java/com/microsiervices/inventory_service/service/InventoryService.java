@@ -4,6 +4,8 @@ import com.microsiervices.inventory_service.dao.InventoryDao;
 import com.microsiervices.inventory_service.dto.InventoryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,4 +27,10 @@ public class InventoryService {
                                 .build()
                 ).toList();
     }
+
+    @KafkaListener(topics = "order-created-topic", autoStartup = "${listen.auto.start:true}", concurrency = "${listen.concurrency:3}")
+    public void testKafka(String msg) {
+        log.info(msg);
+    }
+
 }

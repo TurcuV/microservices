@@ -32,6 +32,11 @@ public class OrderController {
         return CompletableFuture.supplyAsync(() -> orderService.placeOrder(orderRequest));
     }
 
+    @GetMapping("/test")
+    public void test() {
+        orderService.testKafka();
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Order> getOrders() {

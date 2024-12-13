@@ -8,6 +8,8 @@ import com.microsiervices.order_service.model.Order;
 import com.microsiervices.order_service.model.OrderLineItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,6 +24,13 @@ public class OrderService {
 
     private final OrderDao orderDao;
     private final WebClient.Builder webClientBuilder;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
+    public String testKafka() {
+        kafkaTemplate.send("order-created-topic", "aaaaaaaaaaaaaaa");
+
+        return "asdasdads";
+    }
 
     public String placeOrder(OrderRequestDto orderRequest) {
         Order order = new Order();
