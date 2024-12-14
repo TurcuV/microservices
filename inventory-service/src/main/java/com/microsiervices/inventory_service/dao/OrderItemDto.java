@@ -1,17 +1,17 @@
-package com.microsiervices.order_service.dto;
+package com.microsiervices.inventory_service.dao;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderLineItemDto {
-    private Long id;
-    private String skuCode;
-    private BigDecimal price;
+public class OrderItemDto {
+    private UUID productId;
     private Integer quantity;
+    private BigDecimal price;
 }

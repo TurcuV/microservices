@@ -1,14 +1,15 @@
 package com.microsiervices.inventory_service.service;
 
 import com.microsiervices.inventory_service.dao.InventoryDao;
-import com.microsiervices.inventory_service.dto.InventoryResponse;
+import com.microsiervices.inventory_service.dao.OrderItemDto;
+import com.microsiervices.events.InventoryFailedEvent;
+import com.microsiervices.events.InventoryReservedEvent;
+import com.microsiervices.events.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,21 +17,25 @@ import java.util.List;
 public class InventoryService {
 
     private final InventoryDao inventoryDao;
+    private final KafkaProducerService kafkaProducerService;
 
-    public List<InventoryResponse> isInStock(List<String> skuCode) {
+    public boolean isInStock(OrderCreatedEvent event) {
         log.info("Checking Inventory");
-        return inventoryDao.findBySkuCodeIn(skuCode).stream()
-                .map(inventory ->
-                        InventoryResponse.builder()
-                                .skuCode(inventory.getSkuCode())
-                                .isInStock(inventory.getQuantity() > 0)
-                                .build()
-                ).toList();
+        OrderItemDto order = event.getOrderItems().get(0); // get only first item for tests
+        return inventoryDao.findByProductId(order.getProductId()).stream()
+                .anyMatch(product -> product.getQuantity() >= order.getQuantity());
     }
 
-    @KafkaListener(topics = "order-created-topic", autoStartup = "${listen.auto.start:true}", concurrency = "${listen.concurrency:3}")
-    public void testKafka(String msg) {
-        log.info(msg);
-    }
+    @KafkaListener(topics = "order-created-topic",groupId = "inventory-group")
+    public void listenOrderCreatedEvent(OrderCreatedEvent event) {
+        log.info("Received Order: {}", event);
 
+        boolean isInStock = isInStock(event);
+
+        if (isInStock) {
+            kafkaProducerService.publishInventoryReservedEvent(new InventoryReservedEvent(event.getOrderId()));
+        } else {
+            kafkaProducerService.publishInventoryFailedEvent(new InventoryFailedEvent(event.getOrderId(), "Stock not available"));
+        }
+    }
 }

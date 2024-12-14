@@ -17,10 +17,9 @@ public class ProductService {
 
     private final ProductDAO productDAO;
 
-
-
     public void saveProduct(ProductRequest productRequest) {
         Product product = Product.builder()
+                .sellerId(productRequest.getSellerId())
                 .name(productRequest.getName())
                 .description(productRequest.getDescription())
                 .price(productRequest.getPrice())

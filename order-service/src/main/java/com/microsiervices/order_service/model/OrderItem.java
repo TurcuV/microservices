@@ -1,23 +1,24 @@
-package com.microsiervices.inventory_service.model;
+package com.microsiervices.order_service.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Inventory {
+@Table(name = "order_item")
+@Builder
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private UUID productId;
+    private UUID orderId;
     private Integer quantity;
+    private BigDecimal price;
 }
