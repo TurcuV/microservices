@@ -9,6 +9,8 @@
         <option value="$PROJECT_DIR$/inventory-service/inventory-service/inventory-service/pom.xml" />
         <option value="$PROJECT_DIR$/inventory-service/inventory-service/pom.xml" />
         <option value="$USER_HOME$/Downloads/inventory-service/inventory-service/pom.xml" />
+        <option value="$PROJECT_DIR$/discovery-server/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
