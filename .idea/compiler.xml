@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="discovery-server" />
+        <module name="inventory-service" />
         <module name="api-gateway" />
         <module name="inventory-service (2) (com.microservices)" />
         <module name="product-service" />

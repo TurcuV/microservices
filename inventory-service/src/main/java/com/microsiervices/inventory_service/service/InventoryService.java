@@ -7,6 +7,7 @@ import com.microsiervices.events.InventoryReservedEvent;
 import com.microsiervices.events.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class InventoryService {
 
     public boolean isInStock(OrderCreatedEvent event) {
         log.info("Checking Inventory");
+
         OrderItemDto order = event.getOrderItems().get(0); // get only first item for tests
         return inventoryDao.findByProductId(order.getProductId()).stream()
                 .anyMatch(product -> product.getQuantity() >= order.getQuantity());
@@ -30,9 +32,7 @@ public class InventoryService {
     public void listenOrderCreatedEvent(OrderCreatedEvent event) {
         log.info("Received Order: {}", event);
 
-        boolean isInStock = isInStock(event);
-
-        if (isInStock) {
+        if (isInStock(event)) {
             kafkaProducerService.publishInventoryReservedEvent(new InventoryReservedEvent(event.getOrderId()));
         } else {
             kafkaProducerService.publishInventoryFailedEvent(new InventoryFailedEvent(event.getOrderId(), "Stock not available"));

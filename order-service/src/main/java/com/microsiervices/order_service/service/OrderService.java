@@ -10,6 +10,7 @@ import com.microsiervices.order_service.model.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -37,7 +38,7 @@ public class OrderService {
                         .price(item.getPrice())
                         .quantity(item.getQuantity())
                         .build()
-                ).collect(Collectors.toList());
+                ).toList();
         order.setOrderItems(orderItems);
         order.setOrderStatus("CREATED");
         orderDao.save(order);
@@ -87,16 +88,14 @@ public class OrderService {
 
     @KafkaListener(topics = "inventory-events", groupId = "order-group")
     public void handleInventoryEvents(Object event) {
-        if (event instanceof InventoryReservedEvent) {
-            InventoryReservedEvent reservedEvent = (InventoryReservedEvent) event;
-//            Order order = orderRepository.findById(reservedEvent.getOrderId()).orElseThrow();
-//            order.setStatus("CONFIRMED");
-//            orderRepository.save(order);
-        } else if (event instanceof InventoryFailedEvent) {
-            InventoryFailedEvent failedEvent = (InventoryFailedEvent) event;
-//            Order order = orderRepository.findById(failedEvent.getOrderId()).orElseThrow();
-//            order.setStatus("CANCELLED");
-//            orderRepository.save(order);
+        if (((ConsumerRecord<?, ?>) event).value() instanceof InventoryReservedEvent reservedEvent) {
+            Order order = orderDao.findById(reservedEvent.getOrderId()).orElseThrow();
+            order.setOrderStatus("CONFIRMED");
+            orderDao.save(order);
+        } else if (((ConsumerRecord<?, ?>) event).value() instanceof InventoryFailedEvent reservedEvent) {
+            Order order = orderDao.findById(reservedEvent.getOrderId()).orElseThrow();
+            order.setOrderStatus("CANCELLED");
+            orderDao.save(order);
         }
     }
 
